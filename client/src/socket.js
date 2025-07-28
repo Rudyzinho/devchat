@@ -1,6 +1,12 @@
-import { io } from "socket.io-client"
+import { io } from "socket.io-client";
 
-// Use seu IP local
-const socket = io("http://192.168.1.66:3001") // ou o IP da sua máquina
+// URL do seu servidor backend
+const SERVER_URL = "http://192.168.1.66:3001";
 
-export default socket
+// Cria a instância do socket, MAS NÃO CONECTA AINDA.
+// autoConnect: false é a chave aqui!
+const socket = io(SERVER_URL, {
+  autoConnect: false,
+});
+
+export default socket;

@@ -1,6 +1,4 @@
 import express from 'express'
-import pg from 'pg'
-
 const router = express.Router()
 import pool from '../database/pool.js'
 
@@ -13,8 +11,9 @@ router.get('/:chat_id', async (req, res) => {
   }
 
   try {
+    // A query já inclui o nome do remetente, o que é ótimo.
     const result = await pool.query(
-      `SELECT m.*, u.nome as remetente_nome
+      `SELECT m.*, u.nome as remetente_nome, u.avatar as remetente_avatar
        FROM mensagens m
        JOIN usuarios u ON m.remetente_id = u.id
        WHERE m.chat_id = $1

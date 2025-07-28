@@ -4,16 +4,7 @@ export default function UserCard({ user, onClick }) {
   return (
     <div
       onClick={onClick}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "10px",
-        cursor: "pointer",
-        border: "1px solid #ccc",
-        borderRadius: "8px",
-        padding: "8px",
-        marginBottom: "6px",
-      }}
+
     >
       <img
         src={avatarUrl}

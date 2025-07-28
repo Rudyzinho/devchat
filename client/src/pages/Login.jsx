@@ -6,16 +6,20 @@ import { useAuth } from "../context/AuthContext";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
   const { login } = useAuth();
 
   const entrar = async () => {
+    setError(""); // Limpa erros anteriores
     try {
-      const usuario = await apiLogin(email, senha);
-      login(usuario); // Atualiza contexto e localStorage
+      // A API agora retorna { user: {...}, token: "..." }
+      const data = await apiLogin(email, senha);
+      login(data); // Passa o objeto inteiro para o contexto
       navigate("/chats");
     } catch (err) {
-      alert("Email ou senha inválidos");
+      console.error("Erro no login:", err);
+      setError("Email ou senha inválidos.");
     }
   };
 
@@ -32,9 +36,10 @@ export default function Login() {
         type="password"
         value={senha}
         onChange={(e) => setSenha(e.target.value)}
+        onKeyDown={(e) => e.key === 'Enter' && entrar()}
       />
       <button onClick={entrar}>Entrar</button>
-
+      {error && <p style={{ color: "red" }}>{error}</p>}
       <p>
         Não tem conta? <Link to="/register">Cadastrar</Link>
       </p>

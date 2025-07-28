@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { register as apiRegister, login as apiLogin } from "../api";
 import { useAuth } from "../context/AuthContext";
 
@@ -7,18 +7,21 @@ export default function Register() {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
   const { login } = useAuth();
 
   const cadastrar = async () => {
+    setError("");
     try {
       await apiRegister(nome, email, senha);
-      const usuario = await apiLogin(email, senha); // login automático
-      login(usuario);
+      // Login automático após o cadastro
+      const data = await apiLogin(email, senha);
+      login(data); // Passa o objeto { user, token } para o contexto
       navigate("/chats");
     } catch (err) {
       console.error("Erro ao registrar:", err);
-      alert(err?.response?.data?.error || "Erro ao registrar");
+      setError(err?.response?.data?.error || "Erro ao registrar");
     }
   };
 
@@ -29,6 +32,10 @@ export default function Register() {
       <input placeholder="email" value={email} onChange={(e) => setEmail(e.target.value)} />
       <input placeholder="senha" type="password" value={senha} onChange={(e) => setSenha(e.target.value)} />
       <button onClick={cadastrar}>Cadastrar</button>
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      <p>
+        Já tem conta? <Link to="/login">Entrar</Link>
+      </p>
     </div>
   );
 }

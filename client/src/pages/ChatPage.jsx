@@ -1,58 +1,83 @@
-import { useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
-import { useAuth } from "../context/AuthContext"
-import { getMensagens } from "../api"
-import socket from "../socket"
+import { useEffect, useState, useRef } from "react";
+import { useParams, useLocation, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { getMensagens } from "../api";
+import socket from "../socket";
+import Message from "../components/Message";
+import MessageInput from "../components/MessageInput";
 
 export default function ChatPage() {
-  const { chatId } = useParams()
-  const { user } = useAuth()
-  const [mensagens, setMensagens] = useState([])
-  const [conteudo, setConteudo] = useState("")
+  const { chatId } = useParams();
+  const { user } = useAuth();
+  const location = useLocation();
+  // Pega os dados do outro usuário passados pelo 'state' da navegação
+  const otherUser = location.state?.otherUser;
 
-  useEffect(() => {
-    if (!chatId) return
-    getMensagens(chatId).then(setMensagens)
-  }, [chatId])
+  const [mensagens, setMensagens] = useState([]);
+  const messagesEndRef = useRef(null);
 
+  // Função para rolar a tela para a última mensagem
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // ✅ Efeito para CARREGAR O HISTÓRICO de mensagens
   useEffect(() => {
-    const receber = (msg) => {
+    if (chatId) {
+      getMensagens(chatId)
+        .then(setMensagens)
+        .catch(err => console.error("Erro ao buscar histórico:", err));
+    }
+  }, [chatId]);
+
+  // ✅ Efeito para OUVIR MENSAGENS EM TEMPO REAL
+  useEffect(() => {
+    // Só executa se o socket estiver conectado
+    if (!socket) return;
+
+    const receberMensagem = (msg) => {
+      // Verifica se a mensagem recebida pertence a este chat aberto
       if (msg.chat_id == chatId) {
-        setMensagens((prev) => [...prev, msg])
+        // Usa o formato de callback para garantir que sempre estamos usando o estado mais recente
+        setMensagens((prevMensagens) => [...prevMensagens, msg]);
       }
-    }
+    };
 
-    socket.on("mensagem_recebida", receber)
-    return () => socket.off("mensagem_recebida", receber)
-  }, [chatId])
+    socket.on("mensagem_recebida", receberMensagem);
 
-  const enviar = () => {
-    if (conteudo.trim() && user?.id) {
-      socket.emit("nova_mensagem", {
-        chat_id: chatId,
-        remetente_id: user.id,
-        conteudo
-      })
-      setConteudo("")
-    }
+    // Função de limpeza para remover o listener quando o componente desmontar
+    return () => {
+      socket.off("mensagem_recebida", receberMensagem);
+    };
+  }, [chatId, socket]); // Depende do chatId e do socket
+
+  // Efeito para rolar a tela sempre que a lista de mensagens mudar
+  useEffect(() => {
+    scrollToBottom();
+  }, [mensagens]);
+
+  // Se o usuário recarregar a página, o `location.state` se perde.
+  // Em um app real, buscaríamos os dados do `otherUser` pela API.
+  if (!otherUser) {
+    return (
+      <div>
+        <p>Dados do chat não encontrados. Isso pode acontecer se você recarregar a página.</p>
+        <Link to="/chats">Voltar para a lista de chats</Link>
+      </div>
+    );
   }
 
   return (
     <div>
-      <h2>Chat #{chatId}</h2>
-      <div style={{ height: "300px", overflowY: "scroll", border: "1px solid gray" }}>
-        {mensagens.map((m, i) => (
-          <p key={i}>
-            <strong>{m.remetente_id === user.id ? "Você" : m.remetente_nome}:</strong> {m.conteudo}
-          </p>
+      <h2>Conversando com {otherUser.nome}</h2>
+      <Link to="/chats">Voltar</Link>
+      <div style={{ height: "400px", overflowY: "scroll", border: "1px solid gray", padding: "10px", margin: "10px 0" }}>
+        {mensagens.map((m) => (
+          <Message key={m.id} conteudo={m.conteudo} remetenteId={m.remetente_id} />
         ))}
+        <div ref={messagesEndRef} />
       </div>
-      <input
-        value={conteudo}
-        onChange={(e) => setConteudo(e.target.value)}
-        placeholder="Digite sua mensagem"
-      />
-      <button onClick={enviar}>Enviar</button>
+      <MessageInput chatId={chatId} destinatarioId={otherUser.id} />
     </div>
-  )
+  );
 }

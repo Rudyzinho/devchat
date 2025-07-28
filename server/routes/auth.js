@@ -1,5 +1,6 @@
 import express from 'express'
 import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 dotenv.config()
 
@@ -23,16 +24,15 @@ router.post('/register', async (req, res) => {
     const hashed = await bcrypt.hash(senha, 10)
 
     const result = await pool.query(
-      'INSERT INTO usuarios (nome, email, senha) VALUES ($1, $2, $3) RETURNING id, nome',
+      'INSERT INTO usuarios (nome, email, senha) VALUES ($1, $2, $3) RETURNING id, nome, avatar',
       [nome, email, hashed]
     )
 
-    res.json(result.rows[0])
+    res.status(201).json(result.rows[0])
   } catch (err) {
-  console.error("❌ Erro ao registrar usuário:")
-  console.error(err) // Mostra o erro inteiro (stacktrace)
-  res.status(500).json({ error: 'Erro ao registrar usuário', details: err.message })
-}
+    console.error("❌ Erro ao registrar usuário:", err)
+    res.status(500).json({ error: 'Erro ao registrar usuário', details: err.message })
+  }
 })
 
 // Login
@@ -49,10 +49,21 @@ router.post('/login', async (req, res) => {
 
     const senhaCorreta = await bcrypt.compare(senha, user.senha);
     if (!senhaCorreta) {
-      return res.status(401).json({ error: 'Senha incorreta' });
+      return res.status(401).json({ error: 'Credenciais inválidas' });
     }
+    
+    // Gera o Token JWT com o ID e nome do usuário
+    const token = jwt.sign(
+      { id: user.id, nome: user.nome },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
 
-    res.json({ id: user.id, nome: user.nome });
+    // Remove a senha do objeto antes de enviar a resposta
+    delete user.senha;
+
+    res.json({ user, token });
+
   } catch (err) {
     console.error('Erro no login:', err.message);
     res.status(500).json({ error: 'Erro ao fazer login' });

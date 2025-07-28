@@ -1,28 +1,38 @@
-import { useState } from "react"
-import { useAuth } from "../context/AuthContext"
-import socket from "../socket"
+import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import socket from "../socket";
 
 export default function MessageInput({ chatId, destinatarioId }) {
-  const [mensagem, setMensagem] = useState("")
-  const { user } = useAuth()
+  const [mensagem, setMensagem] = useState("");
+  const { user } = useAuth();
 
   const enviar = () => {
-    const conteudo = mensagem.trim()
-    if (!conteudo || !user?.id) return
+    // A variável aqui se chama 'conteudo' (com uma 'u')
+    const conteudo = mensagem.trim();
+    if (!conteudo || !user?.id) return;
 
-    socket.emit("nova_mensagem", {
+    const dadosParaEnviar = {
+      // A propriedade aqui se chama 'chat_id'
       chat_id: chatId,
-      remetente_id: user.id,
       destinatario_id: destinatarioId,
-      conteudo
-    })
+      // E a propriedade aqui se chama 'conteudo'
+      conteudo: conteudo,
+    };
 
-    setMensagem("")
-  }
+    // Verifique no console do seu navegador se este log mostra os dados corretos!
+    console.log("⬅️ Frontend está enviando:", dadosParaEnviar);
+
+    socket.emit("nova_mensagem", dadosParaEnviar);
+
+    setMensagem("");
+  };
 
   const aoPressionar = (e) => {
-    if (e.key === "Enter") enviar()
-  }
+    if (e.key === "Enter") {
+      e.preventDefault();
+      enviar();
+    }
+  };
 
   return (
     <div>
@@ -34,5 +44,5 @@ export default function MessageInput({ chatId, destinatarioId }) {
       />
       <button onClick={enviar}>enviar</button>
     </div>
-  )
+  );
 }

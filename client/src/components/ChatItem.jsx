@@ -1,18 +1,25 @@
-import { Link } from "react-router-dom"
-import { useAuth } from "../context/AuthContext"
+import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
-export default function ChatItem({ chat }) {
-  const { user } = useAuth()
+export default function ChatItem({ chat, currentUser }) {
+  // Recebendo o currentUser como prop para evitar chamadas repetidas do useAuth
+  if (!currentUser) return null;
 
-  if (!user) return null // garante que user está disponível
-
-  const nomeOutro = chat.usuario1_id === user.id ? chat.nome2 : chat.nome1
+  // Determina quem é o outro usuário na conversa
+  const otherUser = {
+    id: chat.usuario1_id === currentUser.id ? chat.usuario2_id : chat.usuario1_id,
+    nome: chat.usuario1_id === currentUser.id ? chat.nome2 : chat.nome1,
+    avatar: chat.usuario1_id === currentUser.id ? chat.avatar2 : chat.avatar1,
+  };
 
   return (
     <div>
-      <Link to={`/chat/${chat.id}`}>
-        <strong>chat com:</strong> {nomeOutro}
+      {/* MUDANÇA CRÍTICA: Adicionamos a prop 'state' ao Link.
+        Isso passa o objeto 'otherUser' para a ChatPage sem precisar de uma nova chamada de API.
+      */}
+      <Link to={`/chat/${chat.id}`} state={{ otherUser }}>
+        <strong>Chat com:</strong> {otherUser.nome}
       </Link>
     </div>
-  )
+  );
 }
