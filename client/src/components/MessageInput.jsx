@@ -20,7 +20,7 @@ export default function MessageInput({ chatId, destinatarioId }) {
     };
 
     // Verifique no console do seu navegador se este log mostra os dados corretos!
-    console.log("⬅️ Frontend está enviando:", dadosParaEnviar);
+    console.log("Frontend está enviando:", dadosParaEnviar);
 
     socket.emit("nova_mensagem", dadosParaEnviar);
 
@@ -35,14 +35,42 @@ export default function MessageInput({ chatId, destinatarioId }) {
   };
 
   return (
-    <div>
-      <input
-        value={mensagem}
-        onChange={(e) => setMensagem(e.target.value)}
-        onKeyDown={aoPressionar}
-        placeholder="digite..."
-      />
-      <button onClick={enviar}>enviar</button>
-    </div>
+    <div style={{
+  display: "flex",
+  alignItems: "center",
+  backgroundColor: "#2a2a2a",
+  borderRadius: "30px",
+  padding: "8px 12px",
+  gap: "8px"
+}}>
+  <input
+    value={mensagem}
+    onChange={(e) => setMensagem(e.target.value)}
+    onKeyDown={aoPressionar}
+    placeholder="digite uma mensagem..."
+    style={{
+      flex: 1,
+      border: "none",
+      outline: "none",
+      backgroundColor: "transparent",
+      color: "white",
+      fontSize: "1em"
+    }}
+  />
+  <button
+    onClick={enviar}
+    style={{
+      backgroundColor: "#016da3ff",
+      color: "white",
+      border: "none",
+      borderRadius: "20px",
+      padding: "6px 12px",
+      fontSize: "0.9em",
+      cursor: "pointer"
+    }}
+  >
+    enviar
+  </button>
+</div>
   );
 }

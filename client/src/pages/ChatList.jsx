@@ -4,6 +4,7 @@ import { getChats } from "../api";
 import { useAuth } from "../context/AuthContext";
 import ChatItem from "../components/ChatItem";
 import OnlineUsers from "../components/OnlineUsers";
+import socket from "../socket";
 
 export default function ChatList() {
   const { user, logout } = useAuth();
@@ -18,6 +19,27 @@ export default function ChatList() {
         .catch((err) => console.error("Erro ao carregar chats:", err));
     }
   }, [user?.id]);
+
+  useEffect(() => {
+    const handleMensagemRecebida = (novaMensagem) => {
+      setChats((prevChats) => {
+        const chatIndex = prevChats.findIndex(c => c.id === novaMensagem.chat_id);
+        if (chatIndex === -1) return prevChats;
+
+        const chatAtualizado = {
+          ...prevChats[chatIndex],
+          ultima_mensagem: novaMensagem.conteudo,
+          ultima_mensagem_em: novaMensagem.criada_em,
+        };
+
+        const outros = prevChats.filter(c => c.id !== novaMensagem.chat_id);
+        return [chatAtualizado, ...outros];
+      });
+    };
+
+    socket.on("mensagem_recebida", handleMensagemRecebida);
+    return () => socket.off("mensagem_recebida", handleMensagemRecebida);
+  }, []);
 
   // ✅ FUNÇÃO PARA ATUALIZAR A LISTA DE CHATS EM TEMPO REAL
   // Esta função será passada para o componente OnlineUsers

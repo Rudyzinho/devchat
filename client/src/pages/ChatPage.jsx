@@ -68,16 +68,66 @@ export default function ChatPage() {
   }
 
   return (
-    <div>
-      <h2>Conversando com {otherUser.nome}</h2>
-      <Link to="/chats">Voltar</Link>
-      <div style={{ height: "400px", overflowY: "scroll", border: "1px solid gray", padding: "10px", margin: "10px 0" }}>
+    <div style={{
+      height: "100vh",
+      display: "flex",
+      flexDirection: "column",
+      backgroundColor: "#e7e7e7ff", // fundo geral mais elegante
+      fontFamily: "sans-serif",
+      position: "relative"
+    }}>
+
+      {/* Header fixo bonito */}
+      <div style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: "60px",
+        backgroundColor: "#1f1f1f",
+        color: "#fff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 20px",
+        zIndex: 10,
+        boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
+      }}>
+        <h2 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 500 }}>{otherUser.nome}</h2>
+        <Link to="/chats" style={{ color: "#aaa", textDecoration: "none", fontSize: "0.9rem" }}>⬅ voltar</Link>
+      </div>
+
+      {/* Área de mensagens com espaço interno limpo */}
+      <div style={{
+        flex: 1,
+        marginTop: "60px",
+        marginBottom: "70px",
+        overflowY: "auto",
+        paddingTop: "16px",
+        paddingLeft: "12px",
+        paddingRight: "12px",
+        paddingBottom: "16px"
+      }}>
         {mensagens.map((m) => (
           <Message key={m.id} conteudo={m.conteudo} remetenteId={m.remetente_id} />
         ))}
         <div ref={messagesEndRef} />
       </div>
-      <MessageInput chatId={chatId} destinatarioId={otherUser.id} />
+
+      {/* Input fixo embaixo, sem borda feia */}
+      <div style={{
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: "70px",
+        backgroundColor: "#1f1f1f",
+        padding: "10px 20px",
+        zIndex: 10,
+        boxShadow: "0 -2px 4px rgba(0,0,0,0.2)"
+      }}>
+        <MessageInput chatId={chatId} destinatarioId={otherUser.id} />
+      </div>
     </div>
   );
 }
