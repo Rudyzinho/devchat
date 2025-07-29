@@ -1,78 +1,62 @@
+// src/pages/ChatList.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getChats } from "../api";
 import { useAuth } from "../context/AuthContext";
+import { getChats } from "../api";
+import socket from "../socket";
 import ChatItem from "../components/ChatItem";
 import OnlineUsers from "../components/OnlineUsers";
-import socket from "../socket";
+import '../styles/ChatApp.css';
 
 export default function ChatList() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [chats, setChats] = useState([]);
   const navigate = useNavigate();
 
-  // Carrega os chats existentes
   useEffect(() => {
-    if (user?.id) {
-      getChats(user.id)
-        .then(setChats)
-        .catch((err) => console.error("Erro ao carregar chats:", err));
-    }
-  }, [user?.id]);
+    if (!user?.id) return;
+    
+    getChats(user.id).then(setChats).catch(console.error);
 
-  useEffect(() => {
-    const handleMensagemRecebida = (novaMensagem) => {
-      setChats((prevChats) => {
-        const chatIndex = prevChats.findIndex(c => c.id === novaMensagem.chat_id);
-        if (chatIndex === -1) return prevChats;
-
-        const chatAtualizado = {
-          ...prevChats[chatIndex],
-          ultima_mensagem: novaMensagem.conteudo,
-          ultima_mensagem_em: novaMensagem.criada_em,
-        };
-
-        const outros = prevChats.filter(c => c.id !== novaMensagem.chat_id);
-        return [chatAtualizado, ...outros];
-      });
+    const handleNewMessage = (newMessage) => {
+        setChats(prev => {
+            const chatIndex = prev.findIndex(c => c.id === newMessage.chat_id);
+            if (chatIndex === -1) return prev;
+            const updatedChat = { ...prev[chatIndex], ultima_mensagem: newMessage.conteudo, ultima_mensagem_em: newMessage.criada_em };
+            const otherChats = prev.filter(c => c.id !== newMessage.chat_id);
+            return [updatedChat, ...otherChats];
+        });
     };
 
-    socket.on("mensagem_recebida", handleMensagemRecebida);
-    return () => socket.off("mensagem_recebida", handleMensagemRecebida);
-  }, []);
+    socket.on('mensagem_recebida', handleNewMessage);
+    return () => socket.off('mensagem_recebida', handleNewMessage);
+  }, [user?.id]);
 
-  // ✅ FUNÇÃO PARA ATUALIZAR A LISTA DE CHATS EM TEMPO REAL
-  // Esta função será passada para o componente OnlineUsers
   const handleNewChat = (newChat, otherUser) => {
-    // Adiciona o novo chat à lista existente sem precisar recarregar a página
     setChats((prevChats) => {
-      // Evita adicionar um chat que já existe na lista
-      if (prevChats.find(c => c.id === newChat.id)) {
-        return prevChats;
-      }
-      return [...prevChats, newChat];
+      if (prevChats.find(c => c.id === newChat.id)) return prevChats;
+      return [newChat, ...prevChats];
     });
-    // Navega para a página do chat
     navigate(`/chat/${newChat.id}`, { state: { otherUser } });
   };
 
   return (
-    <div>
-      <header>
-        <h1>Bem-vindo, {user?.nome}!</h1>
-        <button onClick={logout}>Sair</button>
-      </header>
-      <hr />
-      {/* Passamos a função handleNewChat para o componente filho */}
-      <OnlineUsers onNewChat={handleNewChat} />
-      <hr />
-      <h3>Suas conversas</h3>
-      {chats.length === 0 ? (
-        <p>Nenhum chat ainda. Clique em um usuário online para começar!</p>
-      ) : (
-        // Passamos o currentUser para o ChatItem para ele saber quem é o "outro"
-        chats.map((chat) => <ChatItem key={chat.id} chat={chat} currentUser={user} />)
-      )}
+    // ✅ REMOVIDO O HEADER DUPLICADO DESTE FICHEIRO
+    <div className="chat-list-main-content">
+      <section>
+        <h2 className="section-title">Usuários Online</h2>
+        <OnlineUsers onNewChat={handleNewChat} />
+      </section>
+      <section>
+        <h2 className="section-title">Suas conversas</h2>
+        {chats.length > 0 ? (
+          chats.map((chat) => (
+            <ChatItem key={chat.id} chat={chat} currentUser={user} />
+          ))
+        ) : (
+          <p className="empty-state-message">Nenhuma conversa encontrada.</p>
+        )}
+      </section>
     </div>
   );
 }

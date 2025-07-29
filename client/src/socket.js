@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 
 // URL do seu servidor backend
-const SERVER_URL = "http://192.168.1.66:3001";
+const SERVER_URL = import.meta.env.VITE_API_URL;
 
 // Cria a instância do socket, MAS NÃO CONECTA AINDA.
 // autoConnect: false é a chave aqui!

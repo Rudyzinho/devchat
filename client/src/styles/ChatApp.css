@@ -1,0 +1,904 @@
+/*
+  ======================================================
+  ESTILOS GLOBAIS (APLICADOS POR PADRÃO - MOBILE FIRST)
+  ======================================================
+*/
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%; /* Garante que HTML, BODY e #ROOT ocupem 100% da viewport */
+  width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+.app-container {
+  height: 100vh; /* Usa 100% da altura da viewport */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #e9e9e9ff;
+  font-family: sans-serif;
+  position: relative; /* Para posicionar elementos filhos absolutos */
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* HEADER GLOBAL PARA MOBILE (visível APENAS em MOBILE, oculto em desktop via media query) */
+.header {
+  position: fixed; /* Fixa o header no topo */
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background-color: #1f1f1f;
+  color: #fff;
+  display: flex; /* Visível por padrão em mobile */
+  align-items: center;
+  justify-content: space-between; /* Ajustado para ter espaço entre o título/back e as ações */
+  padding: 0 15px;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  box-sizing: border-box;
+}
+
+/* Container para o conteúdo principal do header (back button, avatar, title) */
+.header-main-content {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espaço entre os elementos */
+    flex: 1; /* Permite que este container ocupe o espaço disponível */
+    overflow: hidden; /* Para lidar com títulos longos */
+}
+
+.header-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* Remover max-width para que o flex box cuide disso */
+  /* max-width: calc(100% - 100px); */
+}
+
+.header-button {
+  background: none;
+  border: 1px solid #aaa;
+  color: #aaa;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  text-decoration: none;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.header-actions, .header-actions-desktop {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Espaçamento entre os botões */
+}
+
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.mobile-only-button {
+    display: block; /* Visível por padrão em mobile */
+    font-size: 1.5rem; /* Aumenta o tamanho da seta */
+    border: none; /* Remove a borda para o ícone */
+    padding: 0; /* Remove padding extra para o ícone */
+    color: #fff; /* Cor da seta */
+    background: none;
+}
+
+/* NOVO: Classe para botões visíveis APENAS em desktop */
+.desktop-only-button {
+    display: none; /* Oculto por padrão em mobile */
+}
+
+/* NOVO: Estilo para o avatar no header mobile */
+.user-avatar-header-mobile {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: #ddd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.9em;
+    color: #555;
+    flex-shrink: 0; /* Evita que o avatar encolha */
+    overflow: hidden; /* Garante que a imagem se ajuste ao círculo */
+}
+
+.user-avatar-header-mobile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.chat-item-avatar-placeholder {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%; /* Essencial para fazer o círculo */
+  background-color: #ccc; /* Cor de fundo para quando não há imagem */
+  margin-right: 15px;
+  flex-shrink: 0; /* Impede que o avatar encolha */
+  
+  /* Para centrar a inicial do nome (o fallback) */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5em;
+  font-weight: bold;
+  color: white;
+  
+  /* Garante que a imagem não "vaze" para fora do círculo */
+  overflow: hidden; 
+}
+
+/* A imagem do avatar em si */
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  
+  /* Garante que a imagem cubra todo o espaço do círculo 
+     sem ficar distorcida. A imagem pode ser um pouco cortada
+     nas bordas para encaixar, o que é o comportamento desejado. */
+  object-fit: cover; 
+}
+
+.avatar-placeholder {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #ccc;
+  margin-right: 15px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5em;
+  color: white;
+  overflow: hidden; /* Essencial para a imagem ficar redonda */
+}
+
+/* Container principal para o layout (sidebar + chat-area) */
+.app-main-layout {
+  flex: 1;
+  display: flex;
+  margin-top: 60px; /* Descola do header fixo (mobile) */
+  position: relative;
+  height: calc(100% - 60px); /* Ocupa o restante da altura (mobile) */
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Sidebar (lista de chats) */
+.sidebar {
+  flex-shrink: 0;
+  width: 100%;
+  background-color: #e9e9e9;
+  border-right: none;
+  overflow-y: auto;
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  transition: transform 0.3s ease-in-out;
+  z-index: 2;
+  overflow-x: hidden;
+}
+
+.sidebar.hidden-mobile {
+  transform: translateX(-100%);
+}
+
+.chat-list-page-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-x: hidden;
+  padding-bottom: 70px; /* Deixa espaço para o rodapé em mobile se houver um */
+}
+
+.chat-list-header-desktop {
+  display: none; /* Oculto por padrão, visível apenas em desktop */
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background-color: #1f1f1f;
+  color: #fff;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 9;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border-bottom: 1px solid #eee;
+  box-sizing: border-box;
+}
+.chat-list-header-desktop .header-title {
+    font-size: 1.1rem;
+}
+
+.chat-list-main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px 10px;
+  padding-top: 15px; /* *** MODIFICADO AQUI ***: Adiciona padding superior para não cortar o conteúdo */
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+/* Área de chat (conversa individual) */
+.chat-area {
+  flex: 1;
+  width: 100%;
+  background-color: #e9e9e9ff;
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  box-sizing: border-box;
+  transition: transform 0.3s ease-in-out;
+  z-index: 1;
+  overflow-x: hidden;
+}
+
+.chat-area.hidden-mobile {
+  transform: translateX(100%);
+}
+
+.chat-page-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-x: hidden;
+  position: relative; /* Para que o footer-input-container possa ser posicionado em relação a ele */
+}
+
+.chat-page-header-desktop {
+  display: none; /* Oculto por padrão, visível apenas em desktop */
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background-color: #1f1f1f;
+  color: #fff;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 9;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border-bottom: 1px solid #eee;
+  box-sizing: border-box;
+}
+.chat-page-header-desktop .header-title {
+    font-size: 1.1rem;
+}
+
+/* Main Content dentro da área de chat (mensagens roláveis) */
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 12px;
+  padding-top: 60px; /* Espaço para o header global em mobile (60px) */
+  padding-bottom: 70px; /* Espaço para o footer-input-container */
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* Footer (para ChatPage) */
+.footer-input-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background-color: #1f1f1f;
+  padding: 10px 20px;
+  z-index: 5;
+  box-shadow: 0 -2px 4px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+/* Estilos de OnlineUsers e ChatList */
+.section-title {
+  color: #333;
+  font-size: 1rem;
+  margin-left: 2%;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 5px;
+}
+
+.online-users-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin: 2% 2% 2% 2%;
+  padding-bottom: 10px;
+  overflow-x: hidden;
+}
+
+.user-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  min-width: 60px;
+  box-sizing: border-box;
+}
+
+.user-card-wrapper:hover {
+  transform: scale(1.05);
+}
+
+.avatar-placeholder, .user-card-avatar-placeholder {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%; /* A propriedade chave para fazer o círculo */
+  background-color: #ccc; /* Cor de fundo para quando não há imagem */
+  flex-shrink: 0;
+  
+  /* Para centrar a inicial do nome (o fallback) */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5em;
+  font-weight: bold;
+  color: white;
+  
+  /* Essencial: "corta" as partes da imagem que saem para fora do círculo */
+  overflow: hidden; 
+}
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  
+  /* Faz a imagem cobrir todo o espaço do círculo sem ficar distorcida. 
+    Este é o comportamento que o WhatsApp e outras apps usam.
+  */
+  object-fit: cover; 
+}
+
+.user-card-name-below {
+  font-size: 0.9em;
+  color: #333;
+  text-align: center;
+  text-transform: lowercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.chat-list-container {
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* Estilos do ChatItem */
+.chat-item-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  box-sizing: border-box;
+}
+
+.chat-item-name {
+  color: #333 !important;
+  font-weight: bold;
+  font-size: 1em;
+}
+.chat-item-link:hover {
+  background-color: #e2e2e293 !important;
+}
+.chat-item {
+  padding: 12px;
+  background-color: #ffffff00;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  width: 100%;
+}
+.chat-item-avatar-placeholder {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #ccc;
+  flex-shrink: 0;
+}
+.chat-item-content {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+.chat-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  box-sizing: border-box;
+}
+
+.chat-item-time {
+  font-size: 0.8em;
+  color: gray;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.chat-item-message-preview {
+  font-size: 0.9em;
+  color: gray;
+  margin: 4px 0 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.empty-state-message {
+  color: #020202; /* Cor da mensagem de carregamento */
+  font-style: italic;
+}
+
+/* Estilos de Mensagens */
+.message-wrapper {
+  display: flex;
+  margin-bottom: 8px;
+  width: 100%;
+}
+.message-wrapper.own {
+  justify-content: flex-end;
+}
+.message-wrapper.other {
+  justify-content: flex-start;
+}
+.message-bubble {
+  padding: 10px 14px;
+  border-radius: 18px;
+  max-width: 85%;
+  word-wrap: break-word;
+  word-break: break-word;
+  line-height: 1.4;
+  font-size: 0.9em;
+  display: inline-block;
+  box-sizing: border-box;
+}
+.message-bubble.own {
+  background-color: rgb(0, 131, 197);
+  color: white;
+  border-bottom-right-radius: 2px;
+}
+.message-bubble.other {
+  background-color: #525252;
+  color: #fdfdfd;
+  border-bottom-left-radius: 2px;
+}
+
+.message-input-container {
+  display: flex;
+  align-items: center;
+  background-color: #1f1f1f;
+  border-radius: 0px;
+  padding: 8px 12px;
+  gap: 8px;
+  box-sizing: border-box;
+  width: 100%;
+}
+.message-input-field {
+  flex: 1;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  color: white;
+  font-size: 1em;
+  padding: 0;
+  box-sizing: border-box;
+}
+.message-send-button {
+  background-color: rgb(0, 131, 197);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+.message-send-button:hover {
+  background-color: #005a8b;
+}
+
+/* Mensagem de estado vazio (geral, para quando não há mensagens num chat ou nenhum chat foi selecionado) */
+.empty-chat-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 20px;
+  box-sizing: border-box;
+  color: #888;
+  font-size: 1.1em;
+}
+
+/* NOVO: Estilo para mensagens de carregamento/estado com contraste */
+.loading-message {
+  color: #555;
+  font-weight: bold;
+  margin-top: 20px;
+  background-color: #f9f9f9;
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  width: fit-content;
+  max-width: 90%;
+  text-align: center;
+  align-self: center;
+}
+
+/* Mensagem "Selecione um chat" para DESKTOP APENAS */
+.no-chat-selected {
+  display: none; /* Oculto por padrão em mobile */
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background-color: #e9e9e9ff;
+  color: #888;
+  font-size: 1.2rem;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* Mensagem de erro específica para a página de chat */
+.chat-page-error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 20px;
+  box-sizing: border-box;
+  color: #c00;
+  font-size: 1.1em;
+  background-color: #ffe0e0;
+  border-radius: 8px;
+  margin: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.chat-page-error-state .header-button {
+  margin-top: 15px;
+  background-color: #e0e0e0;
+  color: #333;
+}
+.chat-page-error-state .header-button:hover {
+  background-color: #d0d0d0;
+}
+
+
+/*
+  ======================================================
+  MEDIA QUERIES PARA RESPONSIVIDADE (TABLET E DESKTOP)
+  ======================================================
+*/
+@media (min-width: 768px) {
+  .app-container {
+    flex-direction: row;
+  }
+
+  /* Oculta o header global em desktop */
+  .header {
+    display: none;
+  }
+
+  .mobile-only-button {
+      display: none !important;
+  }
+
+  /* NOVO: Exibe o botão desktop-only em desktop */
+  .desktop-only-button {
+      display: block !important;
+  }
+
+  .app-main-layout {
+    margin-top: 0; /* Remove a margem superior em desktop, pois o header global está oculto */
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .sidebar {
+    width: 350px;
+    border-right: 1px solid #2c2c2c5e;
+    padding-bottom: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(0);
+    z-index: auto;
+  }
+
+  .sidebar.hidden-mobile {
+    transform: translateX(0);
+    display: flex;
+  }
+
+  .chat-list-page-container {
+    padding-bottom: 0;
+  }
+
+  .chat-list-header-desktop {
+    display: flex; /* Exibe o header da lista de chats em desktop */
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-bottom: none;
+    background-color: #1f1f1f;
+    height: 60px;
+    padding: 0 20px;
+    z-index: 9;
+  }
+
+  .chat-page-header-desktop {
+    display: flex; /* Exibe o header da página de chat em desktop */
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-bottom: none;
+    background-color: #1f1f1f;
+    height: 60px;
+    padding: 0 20px;
+    z-index: 9;
+  }
+
+  .chat-list-header-desktop .header-title {
+      font-size: 1.1rem;
+      color: #fff;
+  }
+
+  .chat-list-main-content {
+    padding-top: 20px; /* Mantém o padding para conteúdo abaixo do header desktop */
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  
+  /* Ajusta o padding-top do main-content em desktop, pois agora ele tem seu próprio header */
+  .main-content {
+      padding-top: 60px; /* Mesma altura do header desktop */
+  }
+
+  .chat-area {
+    position: relative;
+    width: auto;
+    padding-bottom: 0;
+    border-left: none;
+    transform: translateX(0);
+    z-index: auto;
+  }
+
+  .chat-area.hidden-mobile {
+    transform: translateX(0);
+    display: flex;
+  }
+
+  .footer-input-container {
+    position: absolute;
+    height: 70px;
+    padding: 10px 20px;
+  }
+
+  .chat-area > .main-content,
+  .chat-area > .footer-input-container {
+    display: flex;
+  }
+
+  .chat-area > .no-chat-selected {
+      display: flex; /* Exibe a mensagem de "nenhum chat selecionado" em desktop */
+  }
+
+  /* Oculta main-content e footer-input-container quando a rota é /chats (nenhum chat selecionado) */
+  .chat-area:has(> .no-chat-selected) > .main-content,
+  .chat-area:has(> .no-chat-selected) > .footer-input-container {
+    display: none;
+  }
+}
+
+@media (min-width: 1200px) {
+  .sidebar {
+    width: 400px;
+  }
+
+  .chat-list-header-desktop .header-title,
+  .chat-page-header-desktop .header-title {
+    font-size: 1.4rem;
+  }
+
+  .header-button {
+    font-size: 1rem;
+  }
+
+  .user-card-avatar-placeholder {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+.edit-profile-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Centra o cartão verticalmente no mobile */
+  align-items: center;   /* Centra o cartão horizontalmente */
+  padding: 20px;
+  background-color: #fff; /* Fundo branco para a página inteira no mobile */
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+/* O "cartão" do formulário */
+.edit-profile-card {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.edit-profile-title {
+  text-align: center;
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 30px;
+  font-size: 1.8em;
+}
+
+.edit-profile-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.profile-avatar-preview {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 15px;
+  border: 4px solid #f0f2f5;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Esconde o input de ficheiro padrão do navegador */
+.profile-avatar-section input[type="file"] {
+  display: none;
+}
+
+/* Estiliza o 'label' para que ele pareça um botão */
+.profile-avatar-label {
+  background-color: #007bff;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.profile-avatar-label:hover {
+  background-color: #0056b3;
+}
+
+.profile-input-group {
+  margin-bottom: 20px;
+}
+
+.profile-input-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #555;
+  font-weight: 600;
+}
+
+.profile-input-field {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  font-size: 1em;
+}
+
+.profile-save-button {
+  background-color: #28a745; /* Verde para salvar */
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1.1em;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.profile-save-button:hover {
+  background-color: #218838;
+}
+
+.profile-save-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Mensagens de erro e sucesso */
+.profile-error-message, .profile-success-message {
+  text-align: center;
+  margin-top: 15px;
+  font-weight: 500;
+  padding: 10px;
+  border-radius: 5px;
+}
+.profile-error-message { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; }
+.profile-success-message { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; }
+
+
+/* ============================================= */
+/* AJUSTES PARA DESKTOP (ECRÃS MAIORES) */
+/* ============================================= */
+@media (min-width: 768px) {
+  .edit-profile-container {
+    background-color: #f0f2f5; /* Fundo cinza claro no desktop */
+    align-items: flex-start; /* Alinha o cartão no topo */
+    padding-top: 50px;
+  }
+
+  .edit-profile-card {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 30px 40px;
+  }
+}

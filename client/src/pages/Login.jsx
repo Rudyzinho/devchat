@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { login as apiLogin } from "../api";
 import { useAuth } from "../context/AuthContext";
+import '../styles/AuthPages.css'; 
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -13,35 +14,46 @@ export default function Login() {
   const entrar = async () => {
     setError(""); // Limpa erros anteriores
     try {
-      // A API agora retorna { user: {...}, token: "..." }
       const data = await apiLogin(email, senha);
-      login(data); // Passa o objeto inteiro para o contexto
+      login(data);
       navigate("/chats");
     } catch (err) {
       console.error("Erro no login:", err);
-      setError("Email ou senha inválidos.");
+      setError("Email ou senha inválidos. Por favor, tente novamente.");
     }
   };
 
   return (
-    <div>
-      <h2>Login</h2>
-      <input
-        placeholder="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <input
-        placeholder="senha"
-        type="password"
-        value={senha}
-        onChange={(e) => setSenha(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && entrar()}
-      />
-      <button onClick={entrar}>Entrar</button>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <p>
-        Não tem conta? <Link to="/register">Cadastrar</Link>
+    <div className="auth-container">
+      <h2 className="auth-title">Entrar</h2>
+      <div className="input-group">
+        <label htmlFor="email">Email:</label>
+        <input
+          id="email"
+          className="input-field"
+          placeholder="seuemail@exemplo.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+      </div>
+      <div className="input-group">
+        <label htmlFor="senha">Senha:</label>
+        <input
+          id="senha"
+          className="input-field"
+          placeholder="sua senha"
+          type="password"
+          value={senha}
+          onChange={(e) => setSenha(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && entrar()}
+        />
+      </div>
+      <button onClick={entrar} className="auth-button">
+        Entrar
+      </button>
+      {error && <p className="error-message">{error}</p>}
+      <p className="auth-link">
+        Não tem uma conta? <Link to="/register">Cadastre-se</Link>
       </p>
     </div>
   );

@@ -11,7 +11,7 @@ router.get('/:chat_id', async (req, res) => {
   }
 
   try {
-    // A query já inclui o nome do remetente, o que é ótimo.
+
     const result = await pool.query(
       `SELECT m.*, u.nome as remetente_nome, u.avatar as remetente_avatar
        FROM mensagens m

@@ -1,61 +1,80 @@
 import { createContext, useContext, useState, useEffect, useMemo } from "react";
-import socket from "../socket"; // <-- IMPORTA O SEU SOCKET CENTRALIZADO
+import socket from "../socket";
+import { setAuthToken } from "../api";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(() => localStorage.getItem("authToken"));
   const [loading, setLoading] = useState(true);
 
+  // Efeito que roda APENAS UMA VEZ para verificar se já existe um token
   useEffect(() => {
+    const token = localStorage.getItem("token");
     if (token) {
-      // Recupera dados do usuário do localStorage
       const storedUser = localStorage.getItem("usuario");
       if (storedUser) {
         setUser(JSON.parse(storedUser));
       }
-
-      // **A MÁGICA ACONTECE AQUI**
-      // 1. Adiciona o token ao socket ANTES de conectar
+      // Configura o token no axios e no socket ao carregar a aplicação
+      setAuthToken(token);
       socket.auth = { token };
-
-      // 2. Conecta manualmente o socket agora que ele tem o token
       socket.connect();
     }
-
     setLoading(false);
 
-    // Função de limpeza para desconectar
+    // Limpeza geral quando o provedor for desmontado (app fecha)
     return () => {
-      socket.disconnect();
+      if (socket.connected) {
+        socket.disconnect();
+      }
     };
-  }, [token]);
+  }, []); // Array vazio garante que rode apenas na montagem inicial
 
   const login = (data) => {
-    const { user, token } = data;
-    localStorage.setItem("usuario", JSON.stringify(user));
-    localStorage.setItem("authToken", token);
-    setUser(user);
-    setToken(token); // Isso irá disparar o useEffect acima para conectar o socket
+    const { user: userData, token } = data;
+    
+    localStorage.setItem("usuario", JSON.stringify(userData));
+    localStorage.setItem("token", token);
+    
+    setAuthToken(token); // Configura header do axios
+    setUser(userData);
+    
+    // Conecta o socket explicitamente com o novo token
+    socket.auth = { token };
+    socket.connect();
   };
 
   const logout = () => {
+    // Desconecta o socket PRIMEIRO
+    if (socket.connected) {
+      socket.disconnect();
+    }
+    
+    // DEPOIS limpa o estado e o armazenamento local
     localStorage.removeItem("usuario");
-    localStorage.removeItem("authToken");
+    localStorage.removeItem("token");
     setUser(null);
-    setToken(null);
-    socket.disconnect();
+    setAuthToken(null); // Limpa header do axios
+  };
+
+  const updateUser = (newUserData) => {
+    setUser(currentUser => {
+      // Garante que não estamos atualizando um usuário nulo
+      if (!currentUser) return null; 
+      const updatedUser = { ...currentUser, ...newUserData };
+      localStorage.setItem("usuario", JSON.stringify(updatedUser));
+      return updatedUser;
+    });
   };
 
   const value = useMemo(
-    // Agora o contexto provê o mesmo socket para toda a aplicação
-    () => ({ user, token, socket, login, logout, isAuthenticated: !!token }),
-    [user, token]
+    () => ({ user, login, logout, updateUser, isAuthenticated: !!user }),
+    [user]
   );
 
   if (loading) {
-    return <div>Carregando aplicação...</div>;
+    return <div className="loading-screen">Carregando aplicação...</div>;
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
